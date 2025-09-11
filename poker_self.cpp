@@ -107,11 +107,19 @@ public:
 		int repeat = 0;
 		for (size_t i = 2; i < comb.size(); i++)
 		{
-		  //  cout << "check_repeatition target "<< target << "\n";
+			//  cout << "check_repeatition target "<< target << "\n";
 			if (comb[i].card == target)
 				repeat++;
 		}
 		return repeat;
+	}
+
+	bool same_Suit(Player& p)
+	{
+		bool is_SuitSame = false;
+		string Suit_check = p.hand[1].suit;
+		cout << "Suit Cjheck : "<< p.hand[0].suit << "  "  << Suit_check << endl;
+		return is_SuitSame;
 	}
 
 	void showPlayer(const vector<Player>& player)
@@ -126,31 +134,31 @@ public:
 			}
 		}
 	}
-	
+
 	int s_case(int num, Player& p)
 	{
-	   switch(num) {
-	   case 0:
-	       cout << "NULL repeatition" << endl;
-	       break;
-	   case 1:
-	        cout << "ONE_PAIR " << ONE_PAIR << endl;
-	        p.rank = ONE_PAIR;
-	        break;
-	   case 2:
-	        cout << "TWO_PAIR " << TWO_PAIR << endl;
-	        p.rank = TWO_PAIR;
-	        break;
-	   case 3:
-	        cout << "THREE_OF_A_KIND " << THREE_OF_A_KIND << endl;
-	        p.rank = THREE_OF_A_KIND;
-	        break;
-	   case 4:
-	        cout << "FOUR_OF_A_KIND " << FOUR_OF_A_KIND << endl;
-	        p.rank = FOUR_OF_A_KIND;
-	        break;
-	   }
-	   return p.rank;
+		switch(num) {
+		case 0:
+			cout << "NULL repeatition" << endl;
+			break;
+		case 1:
+			cout << "ONE_PAIR " << ONE_PAIR << endl;
+			p.rank = ONE_PAIR;
+			break;
+		case 2:
+			cout << "TWO_PAIR " << TWO_PAIR << endl;
+			p.rank = TWO_PAIR;
+			break;
+		case 3:
+			cout << "THREE_OF_A_KIND " << THREE_OF_A_KIND << endl;
+			p.rank = THREE_OF_A_KIND;
+			break;
+		case 4:
+			cout << "FOUR_OF_A_KIND " << FOUR_OF_A_KIND << endl;
+			p.rank = FOUR_OF_A_KIND;
+			break;
+		}
+		return p.rank;
 	}
 
 	void evaluateHand(Player &p, const vector<Card>& tCards)
@@ -206,7 +214,8 @@ public:
 // 			cout << "Score: " << score << endl;
 		}
 
-	
+		same_Suit(p);
+		// FLUSH
 
 	}
 
