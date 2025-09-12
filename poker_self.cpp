@@ -114,12 +114,15 @@ public:
 		return repeat;
 	}
 
-	bool same_Suit(Player& p)
+	int same_Suit(string target, vector<Card> comb)
 	{
-		bool is_SuitSame = false;
-		string Suit_check = p.hand[1].suit;
-		cout << "Suit Cjheck : "<< p.hand[0].suit << "  "  << Suit_check << endl;
-		return is_SuitSame;
+		int repeat = 0;
+		for (size_t i = 2; i < comb.size(); i++)
+		{
+			if (comb[i].suit == target)
+				repeat++;
+		}
+		return repeat;
 	}
 
 	void showPlayer(const vector<Player>& player)
@@ -139,7 +142,7 @@ public:
 	{
 		switch(num) {
 		case 0:
-			cout << "NULL repeatition" << endl;
+			// cout << "NULL repeatition" << endl;
 			break;
 		case 1:
 			cout << "ONE_PAIR " << ONE_PAIR << endl;
@@ -179,9 +182,9 @@ public:
 		if(p.hand[0].card == p.hand[1].card)
 		{
 			p.rank = ONE_PAIR;
-			cout << "Player has been dealt ONE_PAIR: " << ONE_PAIR
+			/*cout << "Player has been dealt ONE_PAIR: " << ONE_PAIR
 			     << " | "<< p.hand[0].card << p.hand[0].suit << " "
-			     << p.hand[1].card << p.hand[1].suit << endl;
+			     << p.hand[1].card << p.hand[1].suit << endl;*/
 			alreadyPair = true;
 		}
 
@@ -198,7 +201,7 @@ public:
 				repeat = check_repeatition(target, combined);
 				// cout << "FALSE "<< alreadyPair << "\n";
 			}
-// 			cout << "repeat "<< repeat << "\n";
+			// cout << "repeat "<< repeat << "\n";
 			int score = s_case(repeat, p);
 // 			cout << "Score: " << score << endl;
 			repeat = 0;
@@ -207,16 +210,44 @@ public:
 		{
 			target = p.hand[0].card;
 			repeat = check_repeatition(target, combined);
-// 			cout << "TRUE" << alreadyPair << "\n";
+			// cout << "TRUE" << alreadyPair << "\n";
 			repeat = repeat + 1;
-// 			cout << "repeat "<< repeat << "\n";
+			// cout << "repeat "<< repeat << "\n";
 			int score = s_case(repeat, p);
 // 			cout << "Score: " << score << endl;
 		}
-
-		same_Suit(p);
+		bool pairCheck = false;
+		
+		if(p.hand[0].suit == p.hand[1].suit)
+		{
+			pairCheck = true;
+			cout << "same suit" << endl;
+		}
 		// FLUSH
-
+		string str_Target;
+		if(!pairCheck)
+		{
+			for(int i = 0 ; i < 2; i++)
+			{
+				str_Target = p.hand[i].suit;
+				repeat = same_Suit(str_Target, combined);
+			}
+			if(repeat == 5)
+				{
+					p.rank = FLUSH;
+					cout << "FLUSH" <<  p.rank << endl;
+				}
+		}
+		else
+		{
+			target = p.hand[0].card;
+			repeat = check_repeatition(target, combined);
+			if(repeat == 3)
+			{
+				p.rank = FLUSH;
+				cout << "FLUSH" <<  p.rank << endl;
+			}
+		}
 	}
 
 };
