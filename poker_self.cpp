@@ -6,12 +6,14 @@
 #include <set>
 #include <utility>
 #include <map>
+#include <type_traits>
 
 using namespace std;
 
 enum HandRank
 {
-	HIGH_CARD = 1,
+	NADA,
+	HIGH_CARD,
 	ONE_PAIR,
 	TWO_PAIR,
 	THREE_OF_A_KIND,
@@ -27,13 +29,19 @@ struct Card
 {
 	int card;
 	string suit;
+
+	bool operator<(const Card& other) const {
+        if (card != other.card) 
+            return card < other.card;
+        return suit < other.suit;
+    }
 };
 
 struct Player
 {
 	string name;
 	Card hand[2];
-	HandRank rank;
+	HandRank rank = NADA;
 	vector<int> tiebreaker;
 };
 
@@ -102,29 +110,56 @@ public:
 		return dk_Cards;
 	}
 
-	int check_repeatition(int target, const vector<Card> comb)
+	template<typename T>
+	HandRank check_Same(const vector<T>& comb, Player& p)
 	{
-		int repeat = 0;
-		for (size_t i = 2; i < comb.size(); i++)
+		bool is_String = false;
+		map<T, int> count_map;
+		if(std::is_same<T, string>::value)
 		{
-			//  cout << "check_repeatition target "<< target << "\n";
-			if (comb[i].card == target)
-				repeat++;
+			is_String = true;
 		}
-		return repeat;
-	}
-
-	int same_Suit(string target, vector<Card> comb)
-	{
-		int repeat = 0;
-		for (size_t i = 2; i < comb.size(); i++)
+		for(auto &c : comb)
 		{
-			if (comb[i].suit == target)
-				repeat++;
+			count_map[c]++;
 		}
-		return repeat;
+		for(const auto &a : count_map)
+		{
+			if(is_String && a.second == 5)
+			{
+				p.rank = FLUSH;
+				return p.rank;
+			}
+			else
+			{
+			if(a.second == 4)
+				{
+					p.rank = FOUR_OF_A_KIND;
+					return p.rank;
+				}
+			else if(a.second == 3)
+				{
+					p.rank = THREE_OF_A_KIND;
+					return p.rank;
+				}
+			else if(a.second == 2 && count_map.size() == 4)
+			{
+				p.rank = TWO_PAIR;
+				return p.rank;
+			}
+			else if(a.second == 2 && count_map.size() == 6)
+			{
+				p.rank = ONE_PAIR;
+				return p.rank;
+			}
+			else
+			{
+				cout << "No repeatition" << endl;
+				return NADA;
+			}
+		}
+		}
 	}
-
 	void showPlayer(const vector<Player>& player)
 	{
 		for(auto &p : player)
@@ -138,37 +173,14 @@ public:
 		}
 	}
 
-	int s_case(int num, Player& p)
+	string winner(Player &p)
 	{
-		switch(num) {
-		case 0:
-			// cout << "NULL repeatition" << endl;
-			break;
-		case 1:
-			cout << "ONE_PAIR " << ONE_PAIR << endl;
-			p.rank = ONE_PAIR;
-			break;
-		case 2:
-			cout << "TWO_PAIR " << TWO_PAIR << endl;
-			p.rank = TWO_PAIR;
-			break;
-		case 3:
-			cout << "THREE_OF_A_KIND " << THREE_OF_A_KIND << endl;
-			p.rank = THREE_OF_A_KIND;
-			break;
-		case 4:
-			cout << "FOUR_OF_A_KIND " << FOUR_OF_A_KIND << endl;
-			p.rank = FOUR_OF_A_KIND;
-			break;
-		}
-		return p.rank;
+		return p.name;
 	}
-
 	void evaluateHand(Player &p, const vector<Card>& tCards)
 	{
 		vector<Card> combined;
-		bool alreadyPair = false;
-		int target;
+
 		combined.push_back(p.hand[0]);
 		combined.push_back(p.hand[1]);
 		combined.insert(combined.end(), tCards.begin(), tCards.end());
@@ -179,77 +191,11 @@ public:
 		}
 		cout << "\n";
 
-		if(p.hand[0].card == p.hand[1].card)
-		{
-			p.rank = ONE_PAIR;
-			/*cout << "Player has been dealt ONE_PAIR: " << ONE_PAIR
-			     << " | "<< p.hand[0].card << p.hand[0].suit << " "
-			     << p.hand[1].card << p.hand[1].suit << endl;*/
-			alreadyPair = true;
-		}
-
-
-		int tot_Rep;
-		int repeat = 0;
-		//check for pair, 3 of a kind and 4 of a kind
-		if(!alreadyPair)
-		{
-			for(int i = 0 ; i < 2; i++)
-			{
-				target = p.hand[i].card;
-				// cout << "target "<< target << "\n";
-				repeat = check_repeatition(target, combined);
-				// cout << "FALSE "<< alreadyPair << "\n";
-			}
-			// cout << "repeat "<< repeat << "\n";
-			int score = s_case(repeat, p);
-// 			cout << "Score: " << score << endl;
-			repeat = 0;
-		}
-		else
-		{
-			target = p.hand[0].card;
-			repeat = check_repeatition(target, combined);
-			// cout << "TRUE" << alreadyPair << "\n";
-			repeat = repeat + 1;
-			// cout << "repeat "<< repeat << "\n";
-			int score = s_case(repeat, p);
-// 			cout << "Score: " << score << endl;
-		}
-		bool pairCheck = false;
-		
-		if(p.hand[0].suit == p.hand[1].suit)
-		{
-			pairCheck = true;
-			cout << "same suit" << endl;
-		}
-		// FLUSH
-		string str_Target;
-		if(!pairCheck)
-		{
-			for(int i = 0 ; i < 2; i++)
-			{
-				str_Target = p.hand[i].suit;
-				repeat = same_Suit(str_Target, combined);
-			}
-			if(repeat == 5)
-				{
-					p.rank = FLUSH;
-					cout << "FLUSH" <<  p.rank << endl;
-				}
-		}
-		else
-		{
-			target = p.hand[0].card;
-			repeat = check_repeatition(target, combined);
-			if(repeat == 3)
-			{
-				p.rank = FLUSH;
-				cout << "FLUSH" <<  p.rank << endl;
-			}
-		}
+		//FLUSH && STRAIGHT
+		check_Same(combined, p);
+		cout << "Rank : " << p.rank << endl;
+		cout << winner(p) << endl;
 	}
-
 };
 
 
@@ -271,3 +217,4 @@ int main()
 
 	return 0;
 }
+
